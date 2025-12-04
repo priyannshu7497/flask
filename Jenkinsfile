@@ -2,13 +2,17 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout Code') {
+            steps {
+                git credentialsId: 'jenkins-github-key', url: 'git@github.com:priyannshu7497/flask.git', branch: 'main'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh '''
                 python3 -m venv venv
-                source venv/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt --break-system-packages
+                bash -c "source venv/bin/activate && pip install -r requirements.txt"
                 '''
             }
         }
@@ -16,8 +20,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                source venv/bin/activate
-                pytest || true
+                bash -c "source venv/bin/activate && pytest"
                 '''
             }
         }
@@ -25,7 +28,7 @@ pipeline {
         stage('Deploy to Server') {
             steps {
                 sh '''
-                echo "Deployment step running..."
+                bash -c "source venv/bin/activate && python3 app.py &"
                 '''
             }
         }
